@@ -1,0 +1,96 @@
+{
+  "name": "Long-form YouTube video pipeline (scoped runner API)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "long-video-render",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f5bf523e-1ab2-443a-8ec5-160799be6c20",
+      "name": "Render webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 240],
+      "webhookId": "youtube-long-video-render"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst slug = String(body.project_slug ?? '');\nconst allowed = new Set(['koh-chang-ghost-ship', 'flannan-coat', 'example']);\nif (!/^[a-z0-9][a-z0-9-]{1,63}$/.test(slug) || !allowed.has(slug)) throw new Error('project_slug is not allowlisted');\nconst engine = String(body.engine ?? 'mock');\nif (!['mock', 'comfy', 'wan22_flf2v', 'wan22_ti2v_5b'].includes(engine)) throw new Error('engine is not allowlisted');\nreturn [{json: {project_slug: slug, engine, resume: body.resume !== false, dry_run: body.dry_run === true, request_id: String(body.request_id ?? '').slice(0, 96)}}];"
+      },
+      "id": "ce6277fd-0a9c-4bb9-a1d8-9024a2ff4030",
+      "name": "Validate and constrain request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://pipeline-runner:8095/v1/render",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Content-Type", "value": "application/json"},
+            {"name": "Authorization", "value": "Bearer REPLACE_WITH_N8N_CREDENTIAL_OR_SECRET"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {"timeout": 14400000}
+      },
+      "id": "b5724d5c-291f-4fce-a92d-bdf2c57efbdb",
+      "name": "Submit scoped render job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 240]
+    },
+    {
+      "parameters": {"respondWith": "json", "responseBody": "={{ JSON.stringify($json) }}", "options": {"responseCode": "={{ $json.ok ? 200 : 500 }}"}},
+      "id": "9c573b1c-38db-41b5-b2ac-08c941b84dad",
+      "name": "Return runner response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [940, 240]
+    },
+    {
+      "parameters": {"rule": {"interval": [{"field": "days", "daysInterval": 1}]}},
+      "id": "d7fdfdd6-a9fd-4560-a1bb-a81c338f58ad",
+      "name": "Daily registry scout",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 520]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://pipeline-runner:8095/v1/registry/refresh",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name": "Authorization", "value": "Bearer REPLACE_WITH_N8N_CREDENTIAL_OR_SECRET"}]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({source: 'n8n-daily', review_required: true}) }}",
+        "options": {"timeout": 600000}
+      },
+      "id": "4f937cc0-130e-41b7-89c4-eaf65c25551b",
+      "name": "Request registry refresh",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 520]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Render webhook": {"main": [[{"node": "Validate and constrain request", "type": "main", "index": 0}]]},
+    "Validate and constrain request": {"main": [[{"node": "Submit scoped render job", "type": "main", "index": 0}]]},
+    "Submit scoped render job": {"main": [[{"node": "Return runner response", "type": "main", "index": 0}]]},
+    "Daily registry scout": {"main": [[{"node": "Request registry refresh", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1", "timezone": "UTC"},
+  "versionId": "0c594829-27fb-46e1-97ca-1ca6c45d4a29",
+  "meta": {"templateCredsSetupCompleted": false},
+  "tags": []
+}

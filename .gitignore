@@ -46,6 +46,15 @@ node_modules/
 registry/__pycache__/
 registry/*.db
 
+# Generated YouTube package media/render scratch (keep prompts/storyboards/SEO source)
+video_packages/*/audio/
+video_packages/*/clips/
+video_packages/*/renders/
+video_packages/*/.chain_work/
+video_packages/*/captions.ass
+video_packages/*/manim_blocks_generated.py
+scout-report.json
+
 # --- OS --------------------------------------------------------------------
 .DS_Store
 Thumbs.db

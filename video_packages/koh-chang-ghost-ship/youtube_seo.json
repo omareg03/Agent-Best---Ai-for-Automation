@@ -1,0 +1,104 @@
+{
+  "channel": "Amazing Random Things",
+  "requested_title_not_used": "The Mystery Ghost Ship Left to Rot in a Thai Jungle (Koh Chang Part 2 — Exact GPS Coordinates)",
+  "research_status": "NO vidIQ paid account telemetry or authenticated export was available. Outlier score, VPH, keyword volume/competition, swipe rate, APV and scorecard values are UNVERIFIED. Do not claim thresholds are achieved.",
+  "channel_stats_status": "Subscriber counts and sample-video views in the request are user-provided and unauthenticated.",
+  "title_candidates": [
+    {
+      "title": "Koh Chang’s Ghost Ship: What Remains?",
+      "characters": 37,
+      "thumbnail_text": "SHIP GONE"
+    },
+    {
+      "title": "Thailand’s Jungle Ship That Vanished",
+      "characters": 36,
+      "thumbnail_text": "JUNGLE SECRET"
+    },
+    {
+      "title": "The Galaxy: Koh Chang’s Lost Ship",
+      "characters": 33,
+      "thumbnail_text": "FIRE CHANGED IT"
+    }
+  ],
+  "long_tail_keywords": [
+    {
+      "phrase": "Koh Chang ghost ship history",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Galaxy Hotel Koh Chang Thailand",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "abandoned ship Koh Chang location",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Koh Chang Grand Lagoona resort",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Thailand ghost ship fire 2024",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    }
+  ],
+  "description": "Koh Chang’s Ghost Ship: What Remains?\n\nThe Galaxy at Koh Chang Grand Lagoona became one of Thailand’s most memorable abandoned-site stories—but the familiar image of the intact ghost ship is now history. The ship-hotel was severely damaged by fire on 3 December 2024, and its upper structure was dismantled in 2025. This travel-history Short follows the location, resort story, fire, and what sources say remains. The map pin shown is approximate, not survey-grade; confirm the location and current access before visiting. Do not trespass or enter damaged structures.\n\nKoh Chang ghost ship history\nGalaxy Hotel Koh Chang Thailand\nabandoned ship Koh Chang location\nKoh Chang Grand Lagoona resort\nThailand ghost ship fire 2024\n\nChapters (Shorts timeline):\n00:00 The lagoon clue\n00:05 Find Koh Chang\n00:10 The Galaxy\n00:15 The resort\n00:20 Closure\n00:25 The 2024 fire\n00:30 What remains\n00:35 Folklore vs fact\n00:40 Approximate map pin\n00:45 Visitor safety\n00:50 What disappeared\n00:55 Replay the clue\n\nSources and further reading:\nhttps://iamkohchang.com/photos/various/galaxy-koh-chang-ghost-ship.html\nhttps://world.thaipbs.or.th/detail/koh-changs-haunted-ghost-ship-goes-up-in-flames/55670\nhttps://www.jertam.com/places/30391\n\nPlan responsibly and confirm current access. Affiliate links: Airalo eSIM https://cutt.ly/air-alo | BikesBooking https://bikesbooking.tp.st/vwFzbqW5 | Travel https://amazing-a-r-t.com. Affiliate disclosure: the channel may earn a commission at no extra cost to you.\n\nHistorical reenactments and AI-generated visuals, if used, must be clearly labeled and never presented as original archival evidence. We welcome sourced corrections: share a primary document, archival reference, or current on-location update so claims can be checked.\n\nWe distinguish documented fact, source-based inference, and uncertainty; a compelling story should never require invented evidence. \nWe distinguish documented fact, source-based inference, and uncertainty; a compelling story should never require invented evidence. ",
+  "chapters": [
+    "00:00 The lagoon clue",
+    "00:05 Find Koh Chang",
+    "00:10 The Galaxy",
+    "00:15 The resort",
+    "00:20 Closure",
+    "00:25 The 2024 fire",
+    "00:30 What remains",
+    "00:35 Folklore vs fact",
+    "00:40 Approximate map pin",
+    "00:45 Visitor safety",
+    "00:50 What disappeared",
+    "00:55 Replay the clue"
+  ],
+  "tags": [
+    "Koh Chang ghost ship",
+    "Galaxy Hotel Koh Chang",
+    "Koh Chang Thailand",
+    "Grand Lagoona",
+    "abandoned resort Thailand",
+    "Thailand travel mystery",
+    "Bang Bao Koh Chang",
+    "ghost ship hotel",
+    "Klong Kloi Beach",
+    "travel documentary",
+    "Thailand island travel",
+    "ship hotel fire",
+    "Trat province",
+    "Koh Chang coordinates"
+  ],
+  "tags_csv": "Koh Chang ghost ship, Galaxy Hotel Koh Chang, Koh Chang Thailand, Grand Lagoona, abandoned resort Thailand, Thailand travel mystery, Bang Bao Koh Chang, ghost ship hotel, Klong Kloi Beach, travel documentary, Thailand island travel, ship hotel fire, Trat province, Koh Chang coordinates",
+  "tags_character_count": 286,
+  "pinned_comments": [
+    "Plan responsibly and confirm current access. Affiliate links: Airalo eSIM https://cutt.ly/air-alo | BikesBooking https://bikesbooking.tp.st/vwFzbqW5 | Travel https://amazing-a-r-t.com. Affiliate disclosure: the channel may earn a commission at no extra cost to you.",
+    "What source or question should we investigate next? Please include a link; unsourced claims are not evidence."
+  ],
+  "measurement_targets": [
+    "vidIQ outlier ≥3x: measure after upload, cannot forecast",
+    "VPH: record at 1h, 6h and 24h against channel baseline",
+    "Viewed vs swiped away >75% in first 1.5s: Studio measurement, not guaranteed",
+    "APV >100%: possible with replay loop, measure after publication",
+    "Keyword volume and competition <40: not checked in paid vidIQ; paste export before claiming"
+  ]
+}

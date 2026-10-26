@@ -1,0 +1,104 @@
+{
+  "channel": "Silent Evidence",
+  "requested_title_not_used": "Everything You Were Told About the 1900 Flannan Isles Lighthouse Was a Lie (The One Coat Left Behind)",
+  "research_status": "NO vidIQ paid account telemetry or authenticated export was available. Outlier score, VPH, keyword volume/competition, swipe rate, APV and scorecard values are UNVERIFIED. Do not claim thresholds are achieved.",
+  "channel_stats_status": "Subscriber counts and sample-video views in the request are user-provided and unauthenticated.",
+  "title_candidates": [
+    {
+      "title": "Flannan Isles: The Coat Left Behind",
+      "characters": 35,
+      "thumbnail_text": "THE COAT"
+    },
+    {
+      "title": "The 1900 Lighthouse Mystery, Rechecked",
+      "characters": 38,
+      "thumbnail_text": "REAL RECORDS"
+    },
+    {
+      "title": "What the Flannan Isles Records Say",
+      "characters": 34,
+      "thumbnail_text": "MYTH CHECK"
+    }
+  ],
+  "long_tail_keywords": [
+    {
+      "phrase": "Flannan Isles lighthouse mystery 1900",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Donald McArthur coat left behind",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Flannan Isles primary source report",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Flannan lighthouse keepers disappeared",
+      "word_count": 4,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    },
+    {
+      "phrase": "Flannan Isles logbook myth debunked",
+      "word_count": 5,
+      "search_volume": "NOT VERIFIED in vidIQ",
+      "competition": "NOT VERIFIED (<40 target pending)",
+      "basis": "topic hypothesis only"
+    }
+  ],
+  "description": "Flannan Isles: The Coat Left Behind\n\nA source-led check of the 1900 Flannan Isles lighthouse disappearance. We compare Joseph Moore’s contemporary account and the Northern Lighthouse Board investigation with the later details repeated in popular versions. McArthur’s wearing coat was left at the station; that fact does not prove what happened next. The official inquiry proposed that a large sea swept the men away near the west landing, but no one witnessed the disappearance. The original lighthouse logbook is not held by the Northern Lighthouse Board, so dramatic quotations need careful sourcing. This is a mystery with a documented record and genuine limits—not a solved supernatural story.\n\nFlannan Isles lighthouse mystery 1900\nDonald McArthur coat left behind\nFlannan Isles primary source report\nFlannan lighthouse keepers disappeared\nFlannan Isles logbook myth debunked\n\nChapters (Shorts timeline):\n00:00 The coat clue\n00:05 Where it happened\n00:10 The keepers\n00:15 Hesperus arrives\n00:20 Clothing evidence\n00:25 West landing damage\n00:30 Official theory\n00:35 The popular myth\n00:40 The missing log\n00:45 What the coat means\n00:50 What remains unknown\n00:55 Recheck the clue\n\nSources and further reading:\nhttps://www.nlb.org.uk/history/flannan-isles/\nhttps://www.nlb.org.uk/lighthouses/flannan-islands/\nhttps://blog.nrscotland.gov.uk/2023/12/12/flannan-isles-lighthouse-keepers-the-disappearance/\n\nSubscribe for evidence-led historical mysteries. This video distinguishes contemporary records from later retellings; the cause of the keepers’ disappearance remains unresolved.\n\nHistorical reenactments and AI-generated visuals, if used, must be clearly labeled and never presented as original archival evidence. We welcome sourced corrections: share a primary document, archival reference, or current on-location update so claims can be checked.\n\nWe distinguish documented fact, source-based inference, and uncertainty; a compelling story should never require invented evidence. \nWe distinguish documented fact, source-based inference, and uncertainty; a compelling story should never require invented evidence. ",
+  "chapters": [
+    "00:00 The coat clue",
+    "00:05 Where it happened",
+    "00:10 The keepers",
+    "00:15 Hesperus arrives",
+    "00:20 Clothing evidence",
+    "00:25 West landing damage",
+    "00:30 Official theory",
+    "00:35 The popular myth",
+    "00:40 The missing log",
+    "00:45 What the coat means",
+    "00:50 What remains unknown",
+    "00:55 Recheck the clue"
+  ],
+  "tags": [
+    "Flannan Isles mystery",
+    "Flannan Isles lighthouse",
+    "Donald McArthur",
+    "James Ducat",
+    "Thomas Marshall",
+    "Northern Lighthouse Board",
+    "1900 lighthouse mystery",
+    "Outer Hebrides history",
+    "lighthouse keepers vanished",
+    "historical mystery explained",
+    "coat left behind",
+    "myth busting history",
+    "Scottish history",
+    "primary source investigation"
+  ],
+  "tags_csv": "Flannan Isles mystery, Flannan Isles lighthouse, Donald McArthur, James Ducat, Thomas Marshall, Northern Lighthouse Board, 1900 lighthouse mystery, Outer Hebrides history, lighthouse keepers vanished, historical mystery explained, coat left behind, myth busting history, Scottish history, primary source investigation",
+  "tags_character_count": 317,
+  "pinned_comments": [
+    "Subscribe for evidence-led historical mysteries. This video distinguishes contemporary records from later retellings; the cause of the keepers’ disappearance remains unresolved.",
+    "What source or question should we investigate next? Please include a link; unsourced claims are not evidence."
+  ],
+  "measurement_targets": [
+    "vidIQ outlier ≥3x: measure after upload, cannot forecast",
+    "VPH: record at 1h, 6h and 24h against channel baseline",
+    "Viewed vs swiped away >75% in first 1.5s: Studio measurement, not guaranteed",
+    "APV >100%: possible with replay loop, measure after publication",
+    "Keyword volume and competition <40: not checked in paid vidIQ; paste export before claiming"
+  ]
+}

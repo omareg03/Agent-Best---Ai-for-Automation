@@ -1,0 +1,41 @@
+name: Daily AI tool scout
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-ai-scout
+  cancel-in-progress: false
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect official release metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/daily_ai_scout.py --output scout-report.json
+      - name: Publish report for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-scout-${{ github.run_id }}
+          path: scout-report.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: State limitations
+        run: |
+          echo 'This workflow collects official GitHub release and PyPI package metadata only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It cannot verify paid API access, live quotas/pricing, runtime behavior, performance or license suitability.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Review the downloadable report before editing registry/tools.json or AI_TOOL_REGISTRY.md.' >> "$GITHUB_STEP_SUMMARY"

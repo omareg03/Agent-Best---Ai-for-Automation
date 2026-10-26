@@ -120,6 +120,30 @@ storyboard.json ──validate──► plan (durations, scene count, cost — b
 
 Full detail: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · deliberation trace: [`PLAN.md`](PLAN.md)
 
+---
+
+## YouTube Short packages (research-led, not vidIQ-certified)
+
+Two 12-block packages are in [`video_packages/`](video_packages/): Koh Chang’s former Galaxy ship-hotel and a primary-source review of the Flannan Isles coat clue. Each has a storyboard, global visual/voice lock, Nano Banana reference-sheet prompt, first/last-frame and motion prompts, Manim overlay fields, SEO JSON, source notes, and safety/factual guards. The publish titles were **corrected** from the supplied working titles: The Galaxy was damaged by fire in December 2024 and dismantled in 2025, while “everything was a lie” overstates what the Flannan primary record establishes.
+
+The workspace did not have paid vidIQ telemetry or API access. Scores, VPH, keyword volume/competition, viewed-vs-swiped, and APV remain marked **UNVERIFIED**; these are measurement targets, not promises. The Koh Chang pin is labeled approximate, not survey-grade.
+
+New tools:
+
+```bash
+# Validate/generate crisp Manim overlay source (render needs Manim installed).
+python scripts/manim_blocks.py video_packages/flannan-coat/storyboard.json \
+  --output /tmp/flannan_blocks.py --fps 60
+# After producing per-block WAV masters, bind each scene to measured D_i:
+python scripts/manim_blocks.py video_packages/flannan-coat/storyboard.json \
+  --audio-dir video_packages/flannan-coat/audio --output /tmp/flannan_blocks.py --fps 60
+# After supplying WAV and MP4 media for all 12 blocks:
+python scripts/long_video_chain.py video_packages/flannan-coat --fps 30 --captions --resume
+python scripts/long_video_chain.py video_packages/koh-chang-ghost-ship --fps 30 --captions --resume
+```
+
+The chain engine measures each WAV duration first, fits each block, normalizes to CFR `yuv420p`, drops the first frame of blocks after the first, loudness-normalizes the narration to −14 LUFS / −1.5 dBTP / 11 LU, builds <=4-word ASS captions, and records prompts, seeds, model labels, input hashes and decoded boundary-frame hashes in `registry/pipeline_state.db`. Manim source generation was syntax-tested; actual Manim rendering still requires installation and execution. The `daily_ai_scout.yml` workflow uploads official GitHub/PyPI version signals for human review—it does not auto-certify licensing, pricing, runtime or paid account access. The importable n8n workflow and hardened private runner bridge are documented in [`docs/YOUTUBE_AUTOMATION.md`](docs/YOUTUBE_AUTOMATION.md); the bridge has not been deployed to a live n8n instance here.
+
 ### Invariants enforced by code (not documentation)
 
 - A scene is reusable **only** if `status='done'` **and** the file exists **and** the prompt hash matches.
