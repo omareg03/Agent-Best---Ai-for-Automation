@@ -1,0 +1,20 @@
+# Runtime dependencies for the open-weight / offline path.
+# Deliberately tiny: CI installs this in seconds, and the pipeline must run on a
+# free CPU-only runner for assembly.
+pillow>=10.0
+numpy>=1.24
+imageio-ffmpeg>=0.5      # supplies a static ffmpeg when the OS has none
+
+# ---------------------------------------------------------------------------
+# NOT installed by default, on purpose:
+#
+#   edge-tts>=7.3.1   -- only if you need it; <7.3.0 is broken since 2026-10-12
+#                        (Sec-MS-GEC rotation) and it 403s from GitHub runners.
+#   whisperx>=3.8.4   -- 3.8.2/3.8.3 were yanked. Heavy (torch) -> requirements-gpu.txt
+#   kokoro / kokoro-fastapi -- served over HTTP by the Kokoro server, not the client
+#
+# Note: imageio-ffmpeg's static build has NO libass and NO ffprobe. Burn-ins and
+# accurate probing need a system ffmpeg:
+#   Debian/Ubuntu:  sudo apt-get install -y ffmpeg fonts-dejavu-core
+#   macOS:          brew install ffmpeg
+# ---------------------------------------------------------------------------

@@ -1,0 +1,111 @@
+{
+  "title": "The Light That Waited",
+  "slug": "example",
+  "logline": "A lighthouse keeper's daughter returns to a town that kept her father's lamp burning for eleven years, and finds out who was really climbing the stairs.",
+  "style_anchor": "cinematic, shot on 35mm film, teal-and-amber grade, natural overcast light, shallow depth of field, fine grain, muted coastal palette",
+  "character_sheet_prompt": "Mara Vane, 34, olive skin, dark hair tied back loosely, a faint scar on the left eyebrow, heavy wool coat the colour of wet slate, canvas satchel, sea-worn boots. Her father Elias, 60s, silver beard, cable-knit sweater, one hand always holding a brass lamp key.",
+  "negative_prompt": "text, watermark, logo, signature, extra limbs, warped hands, distorted face, duplicate subjects, cartoon, oversaturated",
+  "voice": "af_heart",
+  "music": "",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "aspect_ratio": "16:9",
+  "language": "en",
+  "engine": "wan22_flf2v",
+  "metadata": {
+    "target_minutes": 3,
+    "notes": "Reference project. Shows the full contract: narration-led pacing, FLF2V chaining, deliberate fades only where a time jump occurs."
+  },
+  "scenes": [
+    {
+      "scene_id": "cold_open",
+      "visual_prompt": "Wide aerial establishing shot of a small fishing harbour at dawn, slate-grey sea, a dozen boats, one lighthouse on the headland with its beam still turning against a pale sky.",
+      "voiceover_text": "The town of Ardmore has eleven hundred people, one road, and a light that has not gone out in forty years.",
+      "camera_motion": "slow descent, drone wide",
+      "start_frame_prompt": "High wide, lighthouse beam visible, sea filling the lower half",
+      "end_frame_prompt": "Lower, closer to the headland, boats still readable in the foreground",
+      "seed": 1101,
+      "transition": "cut"
+    },
+    {
+      "scene_id": "harbour_morning",
+      "visual_prompt": "Street-level harbour at first light: crates, coiled rope, a man mending a net, gulls, breath visible in the cold.",
+      "voiceover_text": "When my father died, the council voted to keep the lamp running as a memorial. Nobody thought to ask who would climb the stairs.",
+      "camera_motion": "handheld drift along the quay",
+      "seed": 1102
+    },
+    {
+      "scene_id": "mara_arrives",
+      "visual_prompt": "Mara Vane steps off a small ferry onto a wet stone pier, bag on her shoulder, looking up at the headland. Overcast light, wind in her hair.",
+      "voiceover_text": "I came back on a Tuesday, eleven years late, with a suitcase and a question I did not know how to ask.",
+      "camera_motion": "slow push in on Mara, 85mm",
+      "seed": 1103
+    },
+    {
+      "scene_id": "town_reaction",
+      "visual_prompt": "Two older fishermen pause in a doorway as Mara passes, not hostile, not welcoming, studs of rain on their oilskins.",
+      "voiceover_text": "In a town this size, grief is a shared chore. Everyone had put in a shift.",
+      "camera_motion": "static locked-off, deep focus",
+      "seed": 1104
+    },
+    {
+      "scene_id": "lighthouse_exterior",
+      "visual_prompt": "The lighthouse from below, white tower, rusted iron gallery, gulls wheeling, sea spray on the lens hood.",
+      "voiceover_text": "The council paid a man named Doyle to service the lamp. Every second week, for eleven years, on a boat he had to borrow.",
+      "camera_motion": "slow tilt up the tower",
+      "seed": 1105
+    },
+    {
+      "scene_id": "stairs_climb",
+      "visual_prompt": "Interior spiral stairway, worn stone treads, an iron handrail polished bright in the middle, narrow windows throwing bars of grey light.",
+      "voiceover_text": "One hundred and eleven steps. I counted them as a child, out of superstition, the way you count anything you are afraid of losing.",
+      "camera_motion": "ascending tracking shot, 24mm",
+      "seed": 1106
+    },
+    {
+      "scene_id": "lamp_room",
+      "visual_prompt": "The lamp room: brass gears, a great glass lens, dust suspended in a shaft of morning light, the sea visible through every window.",
+      "voiceover_text": "The lamp room smelled exactly the same. Hot brass, cold glass, and the faint acrid note of the paraffin they had not used since nineteen eighty-nine.",
+      "camera_motion": "slow orbit around the lens",
+      "seed": 1107
+    },
+    {
+      "scene_id": "logbook",
+      "visual_prompt": "Close-up of a battered logbook open on a wooden shelf, dense handwriting, dates in the margin, a brass lamp key resting on the page.",
+      "voiceover_text": "In the log, every visit was recorded in the same careful hand. The same two sentences, eleven years of them.",
+      "camera_motion": "static macro, shallow focus",
+      "seed": 1108
+    },
+    {
+      "scene_id": "doyle_reveal",
+      "visual_prompt": "An old man, Doyle, in the lamp room doorway, cap in hand, not surprised to see her. Weathered face, kind, tired.",
+      "voiceover_text": "Doyle did not look like a man who had kept a promise. He looked like a man who had run out of ways to keep one.",
+      "camera_motion": "slow push in, eye level",
+      "seed": 1109
+    },
+    {
+      "scene_id": "confession",
+      "visual_prompt": "Two-shot in the lamp room, Mara and Doyle, the lens between them, cold light, neither looking at the other.",
+      "voiceover_text": "He told me the council stopped paying in the second year. He told me he had kept climbing anyway, because the light was the only thing in this town nobody had learned to look away from.",
+      "camera_motion": "static, symmetrical composition",
+      "seed": 1110
+    },
+    {
+      "scene_id": "night_beam",
+      "visual_prompt": "Exterior night: the lighthouse beam sweeping across black water, a small fishing boat turning to follow it home.",
+      "voiceover_text": "That was the year the Mary Colm came in through the fog on a dead radio, following nothing but a light that was not supposed to still be there.",
+      "camera_motion": "slow pan following the beam",
+      "transition": "fade",
+      "seed": 1111
+    },
+    {
+      "scene_id": "ending_stairs",
+      "visual_prompt": "Mara alone on the gallery at dawn, hand on the iron rail, the town below her, the lamp warm behind her.",
+      "voiceover_text": "I did not stay to take his place. But I paid the coal bill, and I learned the steps, and I have not missed a Tuesday since.",
+      "camera_motion": "slow pull back to wide",
+      "seed": 1112,
+      "transition": "fade"
+    }
+  ]
+}

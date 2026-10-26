@@ -1,0 +1,15 @@
+# Optional extras for a GPU box (local RTX / Kaggle / Colab / RunPod).
+# Install with:  pip install -r requirements-gpu.txt
+-r requirements.txt
+
+# Word-level caption alignment (+/- 50 ms vs +/- 500 ms without it).
+# NOTE: 3.8.2 and 3.8.3 were YANKED from PyPI (missing word timestamps for
+# digits/symbols, incompatible with faster-whisper < 1.2.0). Pin >=3.8.4.
+whisperx>=3.8.4
+
+# Local TTS (Apache-2.0, CPU-viable). Or run Kokoro-FastAPI in Docker instead
+# and keep this client-side dependency out of your image.
+kokoro>=0.9
+
+# Tests / CI
+pytest>=8.0

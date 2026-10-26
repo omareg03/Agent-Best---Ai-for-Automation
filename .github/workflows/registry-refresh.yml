@@ -1,0 +1,107 @@
+name: Registry - 24h refresh & staleness gate
+
+on:
+  schedule:
+    # Daily at 06:17 UTC (off-peak; avoids the top-of-hour Actions rush).
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      force_recommit:
+        description: "Commit even if nothing changed"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write        # to commit the refreshed registry
+  issues: write          # to raise a staleness issue
+
+concurrency:
+  group: registry-refresh
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: "."
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  refresh:
+    name: Refresh liveness + enforce staleness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Refresh registry (GitHub liveness + licence cross-check)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m scripts.video_pipeline.cli registry refresh --github --source "actions-cron"
+
+      # The script never rewrites pricing/licences; it flags what a human must re-read.
+      - name: Enforce the staleness policy
+        id: gate
+        continue-on-error: true
+        run: python -m scripts.video_pipeline.cli registry check
+
+      - name: Commit refreshed registry
+        if: steps.gate.outcome == 'success' || inputs.force_recommit
+        run: |
+          git config user.name  "registry-bot"
+          git config user.email "registry-bot@users.noreply.github.com"
+          git add registry/tools.json registry/history.jsonl AI_TOOL_REGISTRY.md
+          if git diff --staged --quiet; then
+            echo "registry unchanged"
+          else
+            git commit -m "chore(registry): 24h refresh - liveness + licence cross-check [skip ci]"
+            git push
+          fi
+
+      - name: Open/refresh a staleness issue
+        if: steps.gate.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "AI tool registry: re-verification overdue";
+            const body = [
+              "The 24-hour protocol gate failed: at least one tool has gone past the policy window",
+              "without a human re-verification (`registry/tools.json` → `verified_at`).",
+              "",
+              "**What to do**",
+              "1. Read the primary source (vendor pricing/licence page, model card, repo).",
+              "2. Update the entry and set `verified_at` to today.",
+              "3. Run `python -m scripts.video_pipeline.cli registry refresh --github` then `registry render`.",
+              "4. Commit with the source links in the message.",
+              "",
+              "Run `python -m scripts.video_pipeline.cli registry check` locally to see which tools are stale.",
+              "",
+              `_Reported by ${context.workflow} run ${context.runId}._`
+            ].join("\n");
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: "open", labels: "registry"
+            });
+            const found = existing.data.find(i => i.title === title);
+            if (found) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: found.number, body: "Still stale on " + new Date().toISOString().slice(0, 10)
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ["registry"]
+              });
+            }
+
+      - name: Fail the run if the gate failed
+        if: steps.gate.outcome == 'failure'
+        run: |
+          echo "::error::Registry staleness gate failed - see the issue for the re-verification checklist."
+          exit 1

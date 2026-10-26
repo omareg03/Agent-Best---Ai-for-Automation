@@ -1,0 +1,125 @@
+name: Render - assembly on CPU (mock scenes or uploaded artefacts)
+
+# Why this exists: GitHub-hosted runners have no GPU, so they cannot diffuse.
+# They CAN do the deterministic half of the pipeline (fit, mux, concat, loudnorm,
+# captions, verification) which is exactly what fails when it fails.
+#
+# Real production flow:
+#   GPU box (local / Kaggle / Colab / RunPod) -> renders scenes -> state.db + clips
+#   artifacts uploaded -> this workflow assembles + verifies + publishes
+#
+# This workflow proves the assembly half end-to-end on every manual dispatch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Project slug under projects/ (e.g. example)"
+        type: string
+        default: "example"
+      engine:
+        description: "Engine to use. 'mock' renders placeholder footage on CPU."
+        type: choice
+        options: ["mock", "wan22_flf2v", "wan22_ti2v_5b", "gemini_omni"]
+        default: "mock"
+      limit:
+        description: "Render at most N scenes (leave empty for all)"
+        type: string
+        default: ""
+      burn_captions:
+        description: "Burn karaoke captions into the master"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: "."
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  assemble:
+    name: Assemble + verify (${{ inputs.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install FFmpeg (libass required for burned captions)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Pre-flight plan (duration + cost, no generation)
+        run: |
+          python -m scripts.video_pipeline.cli plan "${{ inputs.project }}" \
+            --engine "${{ inputs.engine }}" | tee plan.txt
+          cat plan.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Render / assemble
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          COMFYUI_URL: ${{ secrets.COMFYUI_URL }}
+        run: |
+          FLAGS=""
+          [ -n "${{ inputs.limit }}" ] && FLAGS="$FLAGS --limit ${{ inputs.limit }}"
+          [ "${{ inputs.burn_captions }}" = "false" ] && FLAGS="$FLAGS --no-captions"
+          python -m scripts.video_pipeline.cli run "${{ inputs.project }}" \
+            --engine "${{ inputs.engine }}" $FLAGS --json > run.json
+          python - <<'PY'
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path("run.json").read_text())
+          run = report["run"]
+          print(f"scenes processed: {run['scenes_processed']}")
+          print(f"cost: ${run['state']['cost_usd']:.4f}")
+          if run["failures"]:
+              for failure in run["failures"]:
+                  print(f"::error title=Scene failed::{failure['scene_id']}: {failure['error'][:400]}")
+              sys.exit(1)
+          print(f"final: {run.get('assembly', {}).get('final')}")
+          PY
+
+      - name: Verification gate
+        run: python -m scripts.video_pipeline.cli verify "${{ inputs.project }}" --json | tee verify.json
+
+      - name: Upload deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-${{ inputs.project }}
+          path: |
+            projects/${{ inputs.project }}/renders/final.mp4
+            projects/${{ inputs.project }}/renders/master.mp4
+            projects/${{ inputs.project }}/renders/thumbnail.jpg
+            projects/${{ inputs.project }}/subtitles/
+            projects/${{ inputs.project }}/manifest.json
+            verify.json
+            plan.txt
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Render: \`${{ inputs.project }}\` (engine: \`${{ inputs.engine }}\`)"
+            echo ""
+            [ -f plan.txt ] && echo '```' && cat plan.txt && echo '```'
+            [ -f verify.json ] && python - <<'PY'
+          import json, pathlib
+          d = json.loads(pathlib.Path("verify.json").read_text())
+          print("")
+          print(f"**Verification: {'PASS' if d['ok'] else 'FAIL'}** — {d['scenes']} scenes, max seam dHash {d['max_boundary_dhash']}, {d['final_duration']}s")
+          for issue in d["issues"]:
+              print(f"- ❌ {issue}")
+          PY
+          } >> "$GITHUB_STEP_SUMMARY"
