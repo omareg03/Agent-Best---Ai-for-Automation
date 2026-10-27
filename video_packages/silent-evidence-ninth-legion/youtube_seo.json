@@ -1,0 +1,93 @@
+{
+  "channel": "Silent Evidence",
+  "research_status": "Live primary-source and current scholarly check performed 2026-10-26. No paid vidIQ telemetry was available; all search volume, competition, Outlier, VPH, swipe and APV metrics remain UNVERIFIED.",
+  "title_candidates": [
+    {
+      "title": "The Ninth Legion: What the Evidence Says",
+      "characters": 40,
+      "thumbnail_text": "FATE UNKNOWN"
+    },
+    {
+      "title": "Rome's Lost Ninth: Britain or the Rhine?",
+      "characters": 40,
+      "thumbnail_text": "YORK 108"
+    },
+    {
+      "title": "Did Rome's Ninth Legion Vanish in Scotland?",
+      "characters": 43,
+      "thumbnail_text": "TRACK THE EAGLE"
+    }
+  ],
+  "long_tail_keywords": [
+    {
+      "phrase": "Ninth Legion disappearance evidence",
+      "word_count": 4,
+      "search_volume": "UNVERIFIED in vidIQ",
+      "competition": "UNVERIFIED in vidIQ"
+    },
+    {
+      "phrase": "Ninth Legion York inscription 108",
+      "word_count": 5,
+      "search_volume": "UNVERIFIED in vidIQ",
+      "competition": "UNVERIFIED in vidIQ"
+    },
+    {
+      "phrase": "Legio IX Hispana fate mystery",
+      "word_count": 5,
+      "search_volume": "UNVERIFIED in vidIQ",
+      "competition": "UNVERIFIED in vidIQ"
+    },
+    {
+      "phrase": "Roman Ninth Legion Nijmegen evidence",
+      "word_count": 5,
+      "search_volume": "UNVERIFIED in vidIQ",
+      "competition": "UNVERIFIED in vidIQ"
+    },
+    {
+      "phrase": "Ninth Legion lost battle myth",
+      "word_count": 5,
+      "search_volume": "UNVERIFIED in vidIQ",
+      "competition": "UNVERIFIED in vidIQ"
+    }
+  ],
+  "description": "Where did Rome’s Ninth Legion go? This 60-second evidence-led history Short revisits Legio IX Hispana without turning an unresolved record into a certain massacre story. A building inscription from York, dated AD 107–108, says Trajan’s gate was built through the agency of the Ninth Legion. Roman tile stamps trace the unit’s presence at York and other British sites. Evidence from Nijmegen suggests at least a detachment may have served on the Rhine frontier in the early second century—but it does not demonstrate that the complete legion moved there. A 2025 scholarly article considers whether events around Hadrian’s visit and a possible security crisis relate to the legion’s disappearance; that is a scholarly interpretation, not proof of a specific battle. The popular “5,000 soldiers vanished in Scotland” framing is not established by the cited inscriptions. The precise fate, final strength, and circumstances remain uncertain.\n\nNinth Legion disappearance evidence\nNinth Legion York inscription 108\nLegio IX Hispana fate mystery\nRoman Ninth Legion Nijmegen evidence\nNinth Legion lost battle myth\n\nChapters (Shorts beat map):\n00:00 MYSTERY, NOT VERDICT\n00:05 AD 107–108\n00:10 GATE BUILT BY LEGION IX\n00:15 YORK • BRITAIN\n00:20 NO FINAL BATTLE REPORT\n00:25 A DETACHMENT?\n00:30 NOT NECESSARILY ALL\n00:35 SCHOLARLY INTERPRETATION\n00:40 NO VERIFIED HEADCOUNT\n00:45 LAST OFFICERS c. 124\n00:50 ABSENCE IS NOT A STORY\n00:55 WHAT HAPPENED?\n\nPrimary and scholarly sources:\nhttps://romaninscriptionsofbritain.org/inscriptions/665\nhttps://romaninscriptionsofbritain.org/instrumentum/2462\nhttps://www.cambridge.org/core/journals/britannia/article/what-happened-next-hadrians-wall-the-expeditio-britannica-and-the-fate-of-the-ninth-legion/2939F9DCC38AC465ED8D2D3B13A3A044\nhttps://www.cambridge.org/core/journals/britannia/article/abs/end-of-the-ninth-legion-war-in-britain-and-the-building-of-hadrians-wall/63F63650070022B9E59DE06BF18D8729\n\nWe distinguish primary evidence, scholarly interpretation, and unanswered questions. Reenactments are illustrative, not original archaeological footage. Subscribe to Silent Evidence for sourced historical mysteries.",
+  "chapters": [
+    "00:00 MYSTERY, NOT VERDICT",
+    "00:05 AD 107–108",
+    "00:10 GATE BUILT BY LEGION IX",
+    "00:15 YORK • BRITAIN",
+    "00:20 NO FINAL BATTLE REPORT",
+    "00:25 A DETACHMENT?",
+    "00:30 NOT NECESSARILY ALL",
+    "00:35 SCHOLARLY INTERPRETATION",
+    "00:40 NO VERIFIED HEADCOUNT",
+    "00:45 LAST OFFICERS c. 124",
+    "00:50 ABSENCE IS NOT A STORY",
+    "00:55 WHAT HAPPENED?"
+  ],
+  "tags": [
+    "Ninth Legion",
+    "Legio IX Hispana",
+    "Roman Britain",
+    "York inscription",
+    "RIB 665",
+    "Roman history",
+    "Ninth Legion mystery",
+    "Hadrian's Wall",
+    "Roman York",
+    "Nijmegen archaeology",
+    "ancient history",
+    "history myth busting"
+  ],
+  "pinned_comments": [
+    "The record is fragmentary, and no single fate is proven. Which clue should we examine next?",
+    "If you have a primary inscription or scholarly source, share it here so we can check the evidence."
+  ],
+  "measurement_targets": [
+    "Outlier ≥3x: measure after posting; no forecast",
+    "VPH: record at 1h, 6h and 24h",
+    "Viewed vs swiped away and APV: measure in YouTube Studio; never guaranteed"
+  ],
+  "tags_csv": "Ninth Legion, Legio IX Hispana, Roman Britain, York inscription, RIB 665, Roman history, Ninth Legion mystery, Hadrian's Wall, Roman York, Nijmegen archaeology, ancient history, history myth busting",
+  "tags_character_count": 198
+}

@@ -1,0 +1,98 @@
+name: Render - GPU (self-hosted ComfyUI runner)
+
+# Diffusing 40-90 clips needs a GPU. GitHub-hosted runners do not have one, and
+# buying cloud minutes for a pipeline you can run on a free Kaggle T4 is wasteful.
+#
+# Register a self-hosted runner ON the GPU box (local RTX, RunPod pod, Lambda,
+# a spare workstation) with the label used below, start ComfyUI with
+# `--listen 0.0.0.0`, expose COMFYUI_URL, and dispatch this workflow.
+#
+# See docs/KAGGLE_COLAB_GPU.md for the free-GPU routes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Project slug under projects/"
+        type: string
+        required: true
+      engine:
+        description: "Open-weight graph to run"
+        type: choice
+        options: ["wan22_flf2v", "wan22_ti2v_5b", "framepack_long_i2v"]
+        default: "wan22_flf2v"
+      limit:
+        description: "Render at most N scenes (recommended for a first run)"
+        type: string
+        default: "2"
+      force:
+        description: "Re-render scenes that are already done"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: "."
+  PYTHONUNBUFFERED: "1"
+  COMFYUI_URL: ${{ secrets.COMFYUI_URL }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+jobs:
+  render:
+    name: Render on GPU runner
+    # Requires a runner registered with these labels. Nothing else can run this job.
+    runs-on: [self-hosted, linux, gpu, comfyui]
+    timeout-minutes: 720        # a 15-minute film can legitimately take hours
+    environment: gpu-render     # optional manual approval gate before spending GPU time
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the GPU and ComfyUI are actually reachable
+        run: |
+          nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv || true
+          python -m scripts.video_pipeline.cli engine probe --engine "${{ inputs.engine }}"
+          # Fails loudly if a node class in our graph is missing from the server.
+          python scripts/validate_comfy.py --graph "${{ inputs.engine }}"
+
+      - name: Plan
+        run: python -m scripts.video_pipeline.cli plan "${{ inputs.project }}" --engine "${{ inputs.engine }}"
+
+      - name: Render
+        run: |
+          FLAGS=""
+          [ -n "${{ inputs.limit }}" ] && FLAGS="$FLAGS --limit ${{ inputs.limit }}"
+          [ "${{ inputs.force }}" = "true" ] && FLAGS="$FLAGS --force"
+          python -m scripts.video_pipeline.cli run "${{ inputs.project }}" \
+            --engine "${{ inputs.engine }}" $FLAGS --json > run.json
+          python -m scripts.video_pipeline.cli status "${{ inputs.project }}" || true
+
+      # State is the product: upload it even when the render fails, so the next
+      # run resumes instead of restarting.
+      - name: Upload state + partial renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpu-state-${{ inputs.project }}-${{ github.run_id }}
+          path: |
+            projects/${{ inputs.project }}/state.db
+            projects/${{ inputs.project }}/state.db-wal
+            projects/${{ inputs.project }}/clips/
+            projects/${{ inputs.project }}/segments/
+            projects/${{ inputs.project }}/manifest.json
+            run.json
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload finished master
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-${{ inputs.project }}
+          path: |
+            projects/${{ inputs.project }}/renders/
+            projects/${{ inputs.project }}/subtitles/
+            projects/${{ inputs.project }}/manifest.json
+          retention-days: 30
+          if-no-files-found: warn

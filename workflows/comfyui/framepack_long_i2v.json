@@ -1,0 +1,35 @@
+{
+  "_comment": "FramePack long-take graph (LEGACY, unmaintained upstream). Purpose: ONE continuous 60-120 s shot at 30 fps from a single still, on 6 GB of VRAM, for scenes that must not cut (a slow reveal, a monologue walk). Requires the community wrapper node pack (ComfyUI-FramePackWrapper). This graph is intentionally NOT the default: the upstream repo is effectively abandoned, so pin your model files. Duration is expressed in seconds, not frames.",
+  "1": {
+    "class_type": "FramePackSampler",
+    "inputs": {
+      "start_image": ["2", 0],
+      "prompt": "__PROMPT__",
+      "negative_prompt": "__NEGATIVE__",
+      "total_second_length": "__DURATION__",
+      "seed": "__SEED__",
+      "steps": 25,
+      "distilled_guidance_scale": 10.0,
+      "gpu_memory_preservation": 6.0,
+      "use_teacache": true
+    },
+    "_note": "Constant-size frame context: generation cost does not grow with clip length."
+  },
+  "2": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "__START_IMAGE__" }
+  },
+  "3": {
+    "class_type": "CreateVideo",
+    "inputs": { "images": ["1", 0], "fps": "__FPS__" }
+  },
+  "4": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": ["3", 0],
+      "filename_prefix": "pipeline/__PREFIX__",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}

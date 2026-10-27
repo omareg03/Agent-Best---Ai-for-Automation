@@ -1,0 +1,121 @@
+name: CI - verification gate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PYTHONPATH: "."
+
+jobs:
+  test:
+    name: Static checks, unit tests, offline end-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # ffmpeg with libass is REQUIRED: subtitles are burned in during the self-test.
+      - name: Install system FFmpeg (libass + loudnorm)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          ffmpeg -hide_banner -version | head -1
+          ffmpeg -hide_banner -filters 2>/dev/null | grep -q " ass " || { echo "::error::ffmpeg build lacks libass"; exit 1; }
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Syntax / import check
+        run: |
+          python -m compileall -q scripts tests
+          python -c "import scripts.video_pipeline.cli as c; print('cli import ok')"
+
+      - name: Storyboard schema + CLI smoke
+        run: |
+          python -m scripts.video_pipeline.cli --version
+          python -m scripts.video_pipeline.cli engine list
+          python -m scripts.video_pipeline.cli storyboard check projects/example/storyboard.json
+
+      - name: ComfyUI graphs are valid and fully tokenised
+        run: python scripts/validate_comfy.py --offline
+
+      - name: Registry integrity + staleness gate
+        run: |
+          python -m scripts.video_pipeline.cli registry render
+          git diff --exit-code AI_TOOL_REGISTRY.md || { echo "::error::AI_TOOL_REGISTRY.md is stale - run 'cli registry render' and commit"; exit 1; }
+          python -m scripts.video_pipeline.cli registry check
+
+      - name: Unit tests
+        run: python -m pytest tests -v --tb=short
+
+      - name: Offline end-to-end self-test (mock models, real FFmpeg)
+        run: python -m scripts.video_pipeline.cli selftest --json > selftest.json
+
+      - name: Verify the rendered film
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          data = json.loads(pathlib.Path("selftest.json").read_text())
+          assert data["ok"], [c for c in data["checks"] if not c["ok"]]
+          assert data["duration"] > 5, data["duration"]
+          print(f"final render: {data['duration']}s -> {data['final']}")
+          PY
+
+      - name: Upload demo film + manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: selftest-render
+          path: |
+            assets/demo/selftest.mp4
+            projects/selftest-demo/manifest.json
+            projects/selftest-demo/subtitles/
+            projects/selftest-demo/renders/thumbnail.jpg
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Pipeline verification"
+            echo ""
+            if [ -f selftest.json ]; then
+              python - <<'PY'
+          import json, pathlib
+          d = json.loads(pathlib.Path("selftest.json").read_text())
+          print(f"**Self-test: {'PASS' if d['ok'] else 'FAIL'}** — {sum(c['ok'] for c in d['checks'])}/{len(d['checks'])} checks in {d['elapsed_seconds']}s")
+          print("")
+          print(f"- Final master: `{d['duration']}s`")
+          print(f"- Project: `{d['project']}`")
+          print("")
+          print("<details><summary>All checks</summary>")
+          print("")
+          for c in d["checks"]:
+              print(f"- {'✅' if c['ok'] else '❌'} {c['name']}" + (f" — {c['detail'][:120]}" if c['detail'] else ""))
+          print("")
+          print("</details>")
+          PY
+            else
+              echo "_self-test did not produce a report_"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/omareg03/Agent-Best---Ai-for-Automation/prompts/storyboard.schema.json",
+  "title": "Long-form storyboard",
+  "description": "Contract consumed by scripts/video_pipeline/storyboard.py. Validated before any GPU time is spent.",
+  "type": "object",
+  "required": ["title", "scenes"],
+  "additionalProperties": true,
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+    "logline": { "type": "string" },
+    "style_anchor": {
+      "type": "string",
+      "description": "Applied to every keyframe and clip. See prompts/style_anchor.md"
+    },
+    "character_sheet_prompt": {
+      "type": "string",
+      "description": "Master identity description. Generated once, used as reference for every keyframe."
+    },
+    "negative_prompt": { "type": "string" },
+    "voice": { "type": "string", "description": "TTS voice id (Kokoro: af_heart, am_michael, ...)" },
+    "music": { "type": "string", "description": "Optional path to a music bed, relative to the project" },
+    "width": { "type": "integer", "minimum": 256, "maximum": 4096, "multipleOf": 2, "default": 1280 },
+    "height": { "type": "integer", "minimum": 256, "maximum": 4096, "multipleOf": 2, "default": 720 },
+    "fps": { "type": "integer", "minimum": 6, "maximum": 60, "default": 24 },
+    "aspect_ratio": { "type": "string", "enum": ["16:9", "9:16", "1:1", "4:5"], "default": "16:9" },
+    "language": { "type": "string", "default": "en" },
+    "engine": {
+      "type": "string",
+      "enum": ["mock", "wan22_flf2v", "wan22_ti2v_5b", "framepack_long_i2v", "gemini_omni"],
+      "description": "Hint only; the CLI --engine flag wins."
+    },
+    "metadata": { "type": "object" },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "required": ["scene_id", "visual_prompt"],
+        "additionalProperties": true,
+        "properties": {
+          "scene_id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,47}$" },
+          "visual_prompt": { "type": "string", "minLength": 3 },
+          "voiceover_text": { "type": "string" },
+          "camera_motion": { "type": "string", "default": "slow push in" },
+          "start_frame_prompt": { "type": "string" },
+          "end_frame_prompt": { "type": "string" },
+          "duration": {
+            "type": ["number", "null"],
+            "minimum": 1,
+            "maximum": 60,
+            "description": "Force clip seconds. Omit to derive from narration length."
+          },
+          "seed": { "type": ["integer", "null"] },
+          "transition": { "type": "string", "enum": ["cut", "fade"], "default": "cut" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

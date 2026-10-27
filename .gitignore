@@ -1,0 +1,60 @@
+# Everything here is a build artefact. A film is not source code.
+# State that must survive a crash does: it lives in SQLite + GitHub artifacts,
+# not in the git object database.
+
+# --- secrets ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+credentials.json
+
+# --- render output ---------------------------------------------------------
+projects/*/renders/
+projects/*/clips/
+projects/*/segments/
+projects/*/keyframes/
+projects/*/audio/
+projects/*/subtitles/
+projects/*/logs/
+projects/*/state.db
+projects/*/state.db-wal
+projects/*/state.db-shm
+projects/*/manifest.json
+!projects/example/storyboard.json
+projects/selftest-demo/
+
+# The demo asset IS committed (it is the proof the pipeline runs), but keep the
+# rest of the generated media out.
+assets/demo/*.mp4
+!assets/demo/selftest.mp4
+
+# --- model / tooling caches ------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+node_modules/
+
+# --- registry noise --------------------------------------------------------
+registry/__pycache__/
+registry/*.db
+
+# Generated YouTube package media/render scratch (keep prompts/storyboards/SEO source)
+video_packages/*/audio/
+video_packages/*/clips/
+video_packages/*/renders/
+video_packages/*/.chain_work/
+video_packages/*/captions.ass
+video_packages/*/manim_blocks_generated.py
+scout-report.json
+
+# --- OS --------------------------------------------------------------------
+.DS_Store
+Thumbs.db

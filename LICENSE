@@ -1,0 +1,47 @@
+MIT License
+
+Copyright (c) 2026 Agent-Best — AI for Automation contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+SCOPE AND MODEL LICENCES (IMPORTANT)
+
+This licence covers the CODE in this repository only. It does NOT cover model
+weights, generated media, or third-party tools invoked by the pipeline. Those
+carry their own terms, and the differences are material:
+
+  * Wan 2.2 (Alibaba)            Apache-2.0                 commercial use OK
+  * FramePack (lllyasviel)       Apache-2.0                 unmaintained upstream
+  * Kokoro-82M (hexgrad)         Apache-2.0                 commercial use OK
+  * Chatterbox (Resemble AI)     MIT                        watermark in output
+  * WhisperX (m-bain)            BSD-2-Clause               commercial use OK
+  * ComfyUI                      GPL-3.0                    distribution obligations
+  * FFmpeg                       LGPL-2.1+ / GPL-2.0+       depends on build flags
+  * HunyuanVideo 1.5 (Tencent)   Tencent Community          NOT valid in EU/UK/South Korea
+  * LTX-2.x (Lightricks)         LTX Community              paid licence above $10M revenue
+  * F5-TTS (SWivid)              MIT code / CC-BY-NC weights  NON-COMMERCIAL
+  * Fish Audio S2                Research licence           commercial licence required
+  * n8n                          Sustainable Use License    source-available, not OSI
+  * Nano Banana / Gemini Omni    Proprietary API terms      paid, SynthID watermark
+
+Verify against the primary source before commercial release. registry/tools.json
+records the licence, source URL and verification date for every tool the pipeline
+can invoke, and `python -m scripts.video_pipeline.cli registry check` enforces that
+this record does not silently rot.

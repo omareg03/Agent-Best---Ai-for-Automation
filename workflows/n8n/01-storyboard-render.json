@@ -1,0 +1,165 @@
+{
+  "name": "01 - Storyboard to Render (resumable, GPU-aware)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Storyboard → render\n\n`POST /webhook/render` with a storyboard JSON body.\n\nFlow: validate → plan → render → verify. Every step shells out to the same Python CLI the GitHub Action uses, so there is exactly one implementation of the pipeline.\n\n**Why `--limit` exists:** wire it to a smoke run (`{\"limit\": 1}`) when you change prompts or a ComfyUI graph; full renders are for the GPU box.\n\n**Resume is automatic:** the SQLite state DB lives in the project folder, so re-running the same webhook continues from the first unfinished scene instead of re-billing for finished ones.",
+        "height": 340,
+        "width": 420,
+        "color": 4
+      },
+      "id": "note-render",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-620, 80]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "render",
+        "responseMode": "responseNode",
+        "options": { "rawBody": false }
+      },
+      "id": "webhook",
+      "name": "Webhook: render",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-160, 220],
+      "webhookId": "render-storyboard"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reject bad input before it can cost money.\nconst body = $input.first().json.body ?? $input.first().json;\nconst required = ['title', 'scenes'];\nconst missing = required.filter((k) => body[k] === undefined);\nif (missing.length) {\n  return [{ json: { ok: false, status: 400, error: `missing fields: ${missing.join(', ')}` } }];\n}\nif (!Array.isArray(body.scenes) || body.scenes.length === 0) {\n  return [{ json: { ok: false, status: 400, error: 'scenes must be a non-empty array' } }];\n}\nconst bad = body.scenes.filter((s) => !s.scene_id || !s.visual_prompt);\nif (bad.length) {\n  return [{ json: { ok: false, status: 400, error: `${bad.length} scene(s) missing scene_id or visual_prompt` } }];\n}\nconst slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');\nconst engine = body.engine || $env.DEFAULT_ENGINE || 'wan22_flf2v';\nconst limit = body.limit ? ` --limit ${Number(body.limit)}` : '';\nconst storyboardJson = JSON.stringify({ ...body, slug }, null, 2).replace(/'/g, `'\\\\''`);\nreturn [{\n  json: {\n    ok: true,\n    slug,\n    engine,\n    sceneCount: body.scenes.length,\n    writeCmd: `mkdir -p {{$env.PIPELINE_REPO}}/projects/${slug} && cat > {{$env.PIPELINE_REPO}}/projects/${slug}/storyboard.json <<'JSON'\\n${storyboardJson}\\nJSON`,\n    planCmd: `cd {{$env.PIPELINE_REPO}} && python3 -m scripts.video_pipeline.cli plan ${slug} --engine ${engine} --json`,\n    runCmd: `cd {{$env.PIPELINE_REPO}} && python3 -m scripts.video_pipeline.cli run ${slug} --engine ${engine}${limit} --json`,\n    verifyCmd: `cd {{$env.PIPELINE_REPO}} && python3 -m scripts.video_pipeline.cli verify ${slug} --json`\n  }\n}];"
+      },
+      "id": "validate",
+      "name": "Validate + build commands",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [80, 220]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "valid",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-valid",
+      "name": "Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [320, 220]
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.writeCmd }}"
+      },
+      "id": "write",
+      "name": "Write storyboard",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [560, 120]
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Validate + build commands').item.json.planCmd }}"
+      },
+      "id": "plan",
+      "name": "Plan (durations + cost)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [780, 120]
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Validate + build commands').item.json.runCmd }}"
+      },
+      "id": "run",
+      "name": "Render (resumable)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1000, 120],
+      "notes": "Long-running: keep the n8n EXECUTIONS_TIMEOUT above your slowest scene (default is 3600s).",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Validate + build commands').item.json.verifyCmd }}"
+      },
+      "id": "verify",
+      "name": "Verify gate",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1220, 120],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse CLI JSON output; surface failures instead of swallowing them.\nconst pick = (node) => {\n  try { return JSON.parse($(node).first().json.stdout || '{}'); } catch (e) { return { parseError: String(e) }; }\n};\nconst run = pick('Render (resumable)');\nconst verify = pick('Verify gate');\nconst ok = Boolean(verify.ok) && !(run.run?.failures?.length);\nreturn [{\n  json: {\n    ok,\n    status: ok ? 200 : 500,\n    project: run.run?.project ?? null,\n    scenesProcessed: run.run?.scenes_processed ?? 0,\n    final: run.run?.assembly?.final ?? null,\n    durationSeconds: run.run?.assembly?.duration ?? 0,\n    costUsd: run.run?.state?.cost_usd ?? 0,\n    issues: verify.issues ?? [],\n    resumeHint: ok ? null : `Re-POST the same storyboard (or run cli resume ${run.run?.project ?? '<slug>'}) -- finished scenes are reused.`\n  }\n}];"
+      },
+      "id": "parse",
+      "name": "Parse result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1440, 120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": { "responseCode": "={{ $json.status }}" }
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1680, 120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "respond-bad",
+      "name": "Respond 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [560, 340]
+    }
+  ],
+  "connections": {
+    "Webhook: render": { "main": [[{ "node": "Validate + build commands", "type": "main", "index": 0 }]] },
+    "Validate + build commands": { "main": [[{ "node": "Valid?", "type": "main", "index": 0 }]] },
+    "Valid?": {
+      "main": [
+        [{ "node": "Write storyboard", "type": "main", "index": 0 }],
+        [{ "node": "Respond 400", "type": "main", "index": 0 }]
+      ]
+    },
+    "Write storyboard": { "main": [[{ "node": "Plan (durations + cost)", "type": "main", "index": 0 }]] },
+    "Plan (durations + cost)": { "main": [[{ "node": "Render (resumable)", "type": "main", "index": 0 }]] },
+    "Render (resumable)": { "main": [[{ "node": "Verify gate", "type": "main", "index": 0 }]] },
+    "Verify gate": { "main": [[{ "node": "Parse result", "type": "main", "index": 0 }]] },
+    "Parse result": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true },
+  "staticData": null,
+  "pinData": {},
+  "versionId": 1,
+  "meta": {
+    "instanceId": "self-hosted",
+    "templateCredsSetupCompleted": false,
+    "description": "Webhook that validates a storyboard and drives the CLI render + verify gate. Part of Agent-Best---Ai-for-Automation."
+  },
+  "tags": [{ "name": "media-pipeline" }, { "name": "render" }]
+}

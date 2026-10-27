@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "longform-video-pipeline"
+version = "1.0.0"
+description = "Keyframe-chained long-form AI video pipeline with resumable state and deterministic FFmpeg assembly"
+requires-python = ">=3.10"
+dependencies = ["pillow>=10.0", "numpy>=1.24", "imageio-ffmpeg>=0.5", "jsonschema>=4.23"]
+
+[project.optional-dependencies]
+gpu = ["whisperx>=3.8.4", "kokoro>=0.9"]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]

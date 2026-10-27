@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+WORKDIR /workspace
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+ENV PYTHONUNBUFFERED=1 PIPELINE_RUNNER_HOST=0.0.0.0 PIPELINE_RUNNER_PORT=8095
+EXPOSE 8095
+CMD ["python", "scripts/pipeline_runner_api.py"]
