@@ -4,6 +4,7 @@
 pillow>=10.0
 numpy>=1.24
 imageio-ffmpeg>=0.5      # supplies a static ffmpeg when the OS has none
+jsonschema>=4.23          # validate Abacus Studio package storyboards
 
 # ---------------------------------------------------------------------------
 # NOT installed by default, on purpose:

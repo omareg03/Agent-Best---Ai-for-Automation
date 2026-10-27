@@ -22,7 +22,11 @@ ROOT = Path(__file__).resolve().parents[1]
 PYTHON = sys.executable
 ENGINES = {"mock", "comfy", "wan22_flf2v", "wan22_ti2v_5b"}
 PIPELINE_PROJECTS = {"example"}
-ASSEMBLY_PROJECTS = {"koh-chang-ghost-ship", "flannan-coat"}
+ASSEMBLY_PROJECTS = {
+    "koh-chang-ghost-ship",
+    "flannan-coat",
+    "silent-evidence-ninth-legion",
+}
 MAX_BODY_BYTES = 1_000_000
 MAX_RESPONSE_CHARS = 12_000
 JOB_LOCK = threading.Lock()  # avoid concurrent GPU jobs / registry writes from webhook retries
@@ -50,6 +54,11 @@ def build_command(project_slug: str, engine: str, *, resume: bool, dry_run: bool
         package = ROOT / "video_packages" / project_slug
         if not (package / "storyboard.json").is_file():
             raise ValueError("allowlisted package storyboard is missing")
+        from scripts.validate_package import validate
+
+        package_issues = validate(package)
+        if package_issues:
+            raise ValueError("package validation failed: " + "; ".join(package_issues))
         command = [
             PYTHON,
             "scripts/long_video_chain.py",

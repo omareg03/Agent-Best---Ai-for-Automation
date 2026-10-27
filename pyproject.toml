@@ -7,7 +7,7 @@ name = "longform-video-pipeline"
 version = "1.0.0"
 description = "Keyframe-chained long-form AI video pipeline with resumable state and deterministic FFmpeg assembly"
 requires-python = ">=3.10"
-dependencies = ["pillow>=10.0", "numpy>=1.24", "imageio-ffmpeg>=0.5"]
+dependencies = ["pillow>=10.0", "numpy>=1.24", "imageio-ffmpeg>=0.5", "jsonschema>=4.23"]
 
 [project.optional-dependencies]
 gpu = ["whisperx>=3.8.4", "kokoro>=0.9"]

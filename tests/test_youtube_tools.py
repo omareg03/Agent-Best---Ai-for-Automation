@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 
 from scripts.auto_captions_4word import cues, write
+from scripts.ingest_assets import ingest
 from scripts.manim_blocks import generate
 from scripts.pipeline_runner_api import ASSEMBLY_PROJECTS, PIPELINE_PROJECTS, build_command
+from scripts.validate_package import validate as validate_package
 from scripts.video_pipeline.ffmpeg_util import ffmpeg_bin, run_ffmpeg
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,13 +33,21 @@ def test_manim_generator_makes_12_valid_scene_classes(tmp_path):
 
 
 def test_video_packages_have_complete_seo_and_chain_contract():
-    dirs = [ROOT / "video_packages/koh-chang-ghost-ship", ROOT / "video_packages/flannan-coat"]
+    dirs = [
+        ROOT / "video_packages/koh-chang-ghost-ship",
+        ROOT / "video_packages/flannan-coat",
+        ROOT / "video_packages/silent-evidence-ninth-legion",
+    ]
     for directory in dirs:
         board = json.loads((directory / "storyboard.json").read_text())
         seo = json.loads((directory / "youtube_seo.json").read_text())
         assert len(board["blocks"]) == 12
         assert len(seo["title_candidates"]) == 3
         assert all(item["characters"] < 55 for item in seo["title_candidates"])
+        for item in seo["title_candidates"]:
+            title_words = set(item["title"].lower().replace("?", "").replace(":", "").split())
+            thumb_words = set(item["thumbnail_text"].lower().split())
+            assert not title_words.intersection(thumb_words)
         assert 2000 <= len(seo["description"]) <= 2500
         assert len(seo["tags_csv"]) < 500
         assert len(seo["pinned_comments"]) == 2
@@ -51,6 +61,65 @@ def test_video_packages_have_complete_seo_and_chain_contract():
             assert block["seed"] > 0
             assert block["audio"].endswith(".wav") and block["clip"].endswith(".mp4")
         assert board["blocks"][-1]["continuity"]
+
+
+def test_package_schema_and_semantic_validation_passes_for_all_packages():
+    for package in (ROOT / "video_packages").iterdir():
+        if package.is_dir():
+            assert validate_package(package) == []
+
+
+def test_package_validator_rejects_external_llm_prompt_leaks(tmp_path):
+    import shutil
+
+    package = tmp_path / "bad-package"
+    shutil.copytree(ROOT / "video_packages/flannan-coat", package)
+    path = package / "storyboard.json"
+    board = json.loads(path.read_text())
+    board["blocks"][0]["visual_prompt"] = "fact check legal disclaimer " * 20
+    path.write_text(json.dumps(board), encoding="utf-8")
+    errors = validate_package(package)
+    assert any("visual_prompt" in item or "disclaimer" in item for item in errors)
+
+
+def test_asset_intake_generates_fallback_and_records_hashes(tmp_path):
+    import shutil
+
+    from PIL import Image
+
+    try:
+        ffmpeg_bin()
+    except Exception:
+        import pytest
+
+        pytest.skip("ffmpeg not installed")
+    package = tmp_path / "flannan-coat"
+    shutil.copytree(ROOT / "video_packages/flannan-coat", package)
+    frame = package / "assets/frames/frame_01.png"
+    frame.parent.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (320, 568), (45, 80, 110)).save(frame)
+    db = tmp_path / "pipeline_state.db"
+    result = ingest(package, db_path=db)
+    assert result["fallback_clips"] == 1
+    assert result["blocks"][0]["status"] == "clipped"
+    assert "block_01_hook" in result["missing_audio"]
+    con = __import__("sqlite3").connect(db)
+    rows = list(
+        con.execute(
+            "SELECT old_status,new_status,frame_sha256,clip_sha256 FROM asset_events WHERE block_id='block_01_hook' ORDER BY id"
+        )
+    )
+    con.close()
+    assert [row[1] for row in rows] == ["keyframed", "clipped"]
+    assert len(rows[-1][2]) == 64 and len(rows[-1][3]) == 64
+    output = package / "assets/clips/block_01_hook.mp4"
+    assert output.is_file() and output.stat().st_size > 1024
+    second = ingest(package, db_path=db)
+    assert second["fallback_clips"] == 0 and not second["ready_for_assembly"]
+    assert len(second["missing_audio"]) == 12
+    con = __import__("sqlite3").connect(db)
+    assert con.execute("SELECT COUNT(*) FROM asset_events WHERE block_id='block_01_hook'").fetchone()[0] == 2
+    con.close()
 
 
 def test_manim_uses_measured_wav_duration_when_available(tmp_path):
@@ -100,6 +169,7 @@ def test_n8n_workflow_is_valid_json_and_uses_allowlist_validation():
 def test_runner_command_uses_allowlists_and_never_a_shell():
     assert PIPELINE_PROJECTS == {"example"}
     assert "flannan-coat" in ASSEMBLY_PROJECTS
+    assert "silent-evidence-ninth-legion" in ASSEMBLY_PROJECTS
     cmd = build_command("example", "mock", resume=True, dry_run=False)
     assert "shell" not in cmd
     assert "scripts.video_pipeline.cli" in cmd

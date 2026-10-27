@@ -230,6 +230,14 @@ def assemble(
     captions: bool,
     resume: bool,
 ) -> dict[str, Any]:
+    from scripts.validate_package import validate
+
+    package_issues = validate(package_dir)
+    if package_issues:
+        raise ValueError(
+            "package validation failed before assembly:\n"
+            + "\n".join(f"- {issue}" for issue in package_issues)
+        )
     spec_path = package_dir / "storyboard.json"
     spec, blocks = load_spec(spec_path)
     scratch = package_dir / ".chain_work"

@@ -144,6 +144,17 @@ python scripts/long_video_chain.py video_packages/koh-chang-ghost-ship --fps 30 
 
 The chain engine measures each WAV duration first, fits each block, normalizes to CFR `yuv420p`, drops the first frame of blocks after the first, loudness-normalizes the narration to −14 LUFS / −1.5 dBTP / 11 LU, builds <=4-word ASS captions, and records prompts, seeds, model labels, input hashes and decoded boundary-frame hashes in `registry/pipeline_state.db`. Manim source generation was syntax-tested; actual Manim rendering still requires installation and execution. The `daily_ai_scout.yml` workflow uploads official GitHub/PyPI version signals for human review—it does not auto-certify licensing, pricing, runtime or paid account access. The importable n8n workflow and hardened private runner bridge are documented in [`docs/YOUTUBE_AUTOMATION.md`](docs/YOUTUBE_AUTOMATION.md); the bridge has not been deployed to a live n8n instance here.
 
+### Abacus Studio → assets → ingest → assemble → upload
+
+1. Generate/review the storyboard in Abacus Studio (or another LLM) and save UTF-8 `storyboard.json` in the package folder.
+2. Run `python scripts/validate_package.py video_packages/<slug>` **before** making media. The JSON Schema plus semantic checks enforce 12 unique blocks, <=60-word visual-only prompts, standalone Nano Banana Pro 9:16 prompts, the block-12/block-01 visual loop, clean UTF-8, and SEO title/thumbnail separation.
+3. Export stills as `assets/frames/frame_01.png` … `frame_12.png`; optionally export block video as `assets/clips/block_01_<suffix>.mp4` … `block_12_<suffix>.mp4`. Read each package's `assets/README.md`. Binary assets use Git LFS; `.gitkeep` preserves empty folders without fake media.
+4. Run `python scripts/ingest_assets.py video_packages/<slug>`. Intake hashes frames/clips into `registry/pipeline_state.db`, updates each block `planned → keyframed → clipped`, and creates a deterministic Ken Burns MP4 for any keyframed block that lacks a clip. It reports missing narration WAVs separately—fallback video does not synthesize voice audio.
+5. Review the report and run `python scripts/validate_package.py video_packages/<slug>`, then assemble with `python scripts/long_video_chain.py video_packages/<slug> --fps 30 --captions --resume` after all audio masters exist.
+6. Inspect the output, citations, rights, captions, audio, frame seams and disclosures; upload manually. No automated upload is implied.
+
+New package: [`silent-evidence-ninth-legion`](video_packages/silent-evidence-ninth-legion/PRODUCTION_NOTES.md). It avoids presenting the popular “5,000 vanished in Scotland” story as established history; the scholarly evidence points to a more complicated and unresolved record.
+
 ### Invariants enforced by code (not documentation)
 
 - A scene is reusable **only** if `status='done'` **and** the file exists **and** the prompt hash matches.

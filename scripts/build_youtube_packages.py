@@ -4,7 +4,13 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from scripts.normalize_video_packages import normalize, prepare_assets  # noqa: E402
 
 COMMON_NOTE = "A storyboard and SEO hypothesis package; no media has been rendered and no paid model/vidIQ account was accessed."
 DATA = {
@@ -15,13 +21,16 @@ DATA = {
         "slug": "koh-chang-galaxy-after-the-fire",
         "location": "Koh Chang Grand Lagoona, southern Koh Chang, Trat, Thailand",
         "coords": "11.9763° N, 102.3332° E (approximate public listing; confirm the pin before publication)",
-        "note": "Important factual correction: The Galaxy ship-hotel was severely burned on 3 December 2024; a 2025 local update reports dismantling of its upper structure. Do not present the intact ship as currently standing. No current 2026 on-site inspection is available here; verify the present site, remnants and legal access before publication.",
+        "note": "Important factual correction: The Galaxy ship-hotel was severely burned on 3 December 2024; a 2025 local update reports dismantling of its upper structure. Do not present the intact ship as currently standing. No current 2026 on-site inspection is available here; verify the present site, remnants and legal access before publication. HTMS Chang is a different ship: the US Naval History and Heritage Command dates the former LST-898's laying down to 15 October 1944 and commissioning to 29 December 1944; NavSource identifies it as ex-USS Lincoln County, 328 ft/100 m overall. PADI lists HTMS Chang as intentionally scuttled on 22 November 2012 to form an artificial reef, about 30 m to the seabed with a stated maximum depth of 34 m. Some dive listings report 117 m length; use the naval 328 ft specification and label dive depths approximate because local references differ. Never say HTMS Chang was sunk during WWII.",
         "lock": "Vertical 9:16 documentary travel mystery; humid Gulf of Thailand haze, emerald jungle, lagoon, weathered concrete and rust; naturalistic restrained teal/amber grade, slow stabilized camera. No supernatural apparitions, fabricated signage, trespassing, or invented present-day intact ship. Any intact Galaxy must be explicitly labeled archival reconstruction and matched to supplied licensed reference images.",
         "ref": "Create a documentary reference sheet for Koh Chang: (1) present-day southern Koh Chang lagoon and tropical shoreline, (2) a clearly labeled archival reconstruction of the former seven-deck Galaxy ship-hotel based only on supplied reference photographs, (3) a clean map panel locating Koh Chang, Trat, Thailand. Maintain realistic geography and muted emerald/teal/amber palette. No ghosts, logos, fabricated text, or implication the ship survives the 2024 fire. Use as consistent reference for all blocks.",
         "sources": [
             "https://iamkohchang.com/photos/various/galaxy-koh-chang-ghost-ship.html",
             "https://world.thaipbs.or.th/detail/koh-changs-haunted-ghost-ship-goes-up-in-flames/55670",
             "https://www.jertam.com/places/30391",
+            "https://www.navsource.org/archives/10/16/160898.htm",
+            "https://www.history.navy.mil/research/histories/ship-histories/danfs/l/lst-898.html",
+            "https://www.padi.com/dive-site/thailand/htms-chang-wreck/",
         ],
         "keywords": [
             "Koh Chang ghost ship history",
@@ -31,8 +40,8 @@ DATA = {
             "Thailand ghost ship fire 2024",
         ],
         "titles": [
-            ("Koh Chang’s Ghost Ship: What Remains?", "SHIP GONE"),
-            ("Thailand’s Jungle Ship That Vanished", "JUNGLE SECRET"),
+            ("Koh Chang’s Ghost Ship: What Remains?", "VESSEL GONE"),
+            ("Thailand’s Jungle Ship That Vanished", "PARADISE SECRET"),
             ("The Galaxy: Koh Chang’s Lost Ship", "FIRE CHANGED IT"),
         ],
         "tags": [
@@ -124,12 +133,12 @@ DATA = {
                 "2025 update",
             ),
             (
-                "rumors",
-                "Stories of curses and accidents spread online, but dramatic closure claims remain disputed.",
-                "Myth-versus-record cards; label unsupported claims folklore.",
-                "FOLKLORE ≠ FACT",
-                "CHECK SOURCES",
-                "Evidence check",
+                "comparison",
+                "Different ship: HTMS Chang was built as USS Lincoln County, a World War Two tank landing ship scuttled as an artificial reef in 2012.",
+                "Underwater wide view of HTMS Chang, clearly distinct from the Galaxy site.",
+                "NOT THE GALAXY",
+                "100 m • bottom ~30–34 m",
+                "2012 artificial reef",
             ),
             (
                 "coordinates",
@@ -188,9 +197,9 @@ DATA = {
             "Flannan Isles logbook myth debunked",
         ],
         "titles": [
-            ("Flannan Isles: The Coat Left Behind", "THE COAT"),
-            ("The 1900 Lighthouse Mystery, Rechecked", "REAL RECORDS"),
-            ("What the Flannan Isles Records Say", "MYTH CHECK"),
+            ("Flannan Isles: The Coat Left Behind", "VANISHED"),
+            ("The 1900 Lighthouse Mystery, Rechecked", "SILENT FILES"),
+            ("What the Flannan Isles Records Say", "LAST SIGNAL"),
         ],
         "tags": [
             "Flannan Isles mystery",
@@ -446,11 +455,14 @@ def make(folder: str, d: dict) -> None:
         + "\n\nUse up to 14 reference images only if the selected paid endpoint/account actually supports it. Log model/version, job ID, source images, and cost. No image generation was run for this package.\n",
         encoding="utf8",
     )
-    notes = f"""# Production notes — {d["slug"]}\n\n## Factual guardrail\n\nThe owner-supplied working title was revised for factual accuracy: `{d["requested_title"]}` is retained only as a brief, not the publish title. Suggested publish title: **{d["title"]}**.\n\n{d["note"]}\n\n## Honest execution status\n\n{COMMON_NOTE} No Nano Banana, video API, Manim renderer, WhisperX alignment, n8n instance, or paid vidIQ telemetry was invoked.\n\n## Workflow\n\n1. Verify source links and map pin/access status immediately before upload.\n2. Record exact model/version, seed, prompt, job id and output hash for each generated asset.\n3. Generate narration WAVs first and measure actual duration `D_i`; Manim and clip fit follow those WAV durations, not the five-second target.\n4. Pass previous clip’s final decoded frame as next clip’s first-frame reference, where the provider supports both endpoints. Validate API behavior before relying on it. Set block 12 final target to block 01 first frame; a loop is an edit goal, not guaranteed seamless by prompt alone.\n5. Generate crisp map/timeline overlays with `python scripts/manim_blocks.py video_packages/{folder}/storyboard.json --output video_packages/{folder}/manim_blocks_generated.py --fps 60 --audio-dir video_packages/{folder}/audio`. Render with `manim -pqh --fps 60 ... Block01` after installing Manim.\n6. Put media at `audio/<block-id>.wav` and `clips/<block-id>.mp4`; assemble using `python scripts/long_video_chain.py video_packages/{folder} --fps 30 --captions --resume`.\n7. Review captions/timing, audio loudness, legal access, facts, rights and disclosures before publishing.\n"""
+    notes = f"""# Production notes — {d["slug"]}\n\n## Factual guardrail\n\nThe owner-supplied working title was revised for factual accuracy: `{d["requested_title"]}` is retained only as a brief, not the publish title. Suggested publish title: **{d["title"]}**.\n\n{d["note"]}\n\n## Honest execution status\n\n{COMMON_NOTE} No Nano Banana, video API, Manim renderer, WhisperX alignment, n8n instance, or paid vidIQ telemetry was invoked.\n\n## Workflow\n\n1. Verify source links and map pin/access status immediately before upload.\n2. Record exact model/version, seed, prompt, job id and output hash for each generated asset.\n3. Generate narration WAVs first and measure actual duration `D_i`; Manim and clip fit follow those WAV durations, not the five-second target.\n4. Pass previous clip’s final decoded frame as next clip’s first-frame reference, where the provider supports both endpoints. Validate API behavior before relying on it. Set block 12 final target to block 01 first frame; a loop is an edit goal, not guaranteed seamless by prompt alone.\n5. Generate crisp map/timeline overlays with `python scripts/manim_blocks.py video_packages/{folder}/storyboard.json --output video_packages/{folder}/manim_blocks_generated.py --fps 60 --audio-dir video_packages/{folder}/audio`. Render with `manim -pqh --fps 60 ... Block01` after installing Manim.\n6. Put narration masters at `audio/<block-id>.wav` and keyframes/clips under `assets/frames/frame_XX.png` and `assets/clips/block_XX_*.mp4`; run `python scripts/ingest_assets.py video_packages/{folder}` before assembling with `python scripts/long_video_chain.py video_packages/{folder} --fps 30 --captions --resume`.\n7. Review captions/timing, audio loudness, legal access, facts, rights and disclosures before publishing.\n"""
     (base / "PRODUCTION_NOTES.md").write_text(notes, encoding="utf8")
 
 
 if __name__ == "__main__":
     for folder, data in DATA.items():
         make(folder, data)
-    print("Built 2 packages (24 blocks).")
+        package_dir = Path("video_packages") / folder
+        normalize(package_dir / "storyboard.json")
+        prepare_assets(package_dir)
+    print("Built and normalized 2 packages (24 blocks).")
