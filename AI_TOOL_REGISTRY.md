@@ -2,7 +2,7 @@
 
 > **Auto-generated. Do not hand-edit.** Source of truth: [`registry/tools.json`](registry/tools.json).
 > Regenerate: `python -m scripts.video_pipeline.cli registry render`
-> Last refresh: **2026-10-26 22:18 UTC** · next due: **2026-10-27T06:00:00+00:00**
+> Last refresh: **2026-10-27 01:02 UTC** · next due: **2026-10-27T06:00:00+00:00**
 
 ## Status
 
@@ -58,7 +58,7 @@ Source: <https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5>
 
 | Tool | Model ID | Shutdown | Days left | Action |
 |---|---|---|---|---|
-| Nano Banana 2 | `gemini-3.1-flash-image` | 2026-10-29 | 2 | 🚫 do not start new work |
+| Nano Banana 2 | `gemini-3.1-flash-image` | 2026-10-29 | 1 | 🚫 do not start new work |
 
 ## Image & Character Anchors
 
