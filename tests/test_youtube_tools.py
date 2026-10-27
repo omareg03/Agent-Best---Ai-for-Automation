@@ -9,6 +9,7 @@ from scripts.manim_blocks import generate
 from scripts.pipeline_runner_api import ASSEMBLY_PROJECTS, PIPELINE_PROJECTS, build_command
 from scripts.validate_package import validate as validate_package
 from scripts.video_pipeline.ffmpeg_util import ffmpeg_bin, run_ffmpeg
+from scripts.video_pipeline.registry_update import load_registry, render_markdown
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -164,6 +165,11 @@ def test_n8n_workflow_is_valid_json_and_uses_allowlist_validation():
         if node["name"] == "Validate and constrain request"
     )
     assert "allowed" in code and "engine is not allowlisted" in code
+
+
+def test_registry_markdown_render_is_deterministic_for_a_source_snapshot():
+    data = load_registry()
+    assert render_markdown(data) == render_markdown(data)
 
 
 def test_runner_command_uses_allowlists_and_never_a_shell():

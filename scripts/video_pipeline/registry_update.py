@@ -204,14 +204,14 @@ def staleness(data: dict[str, Any], *, today: datetime | None = None) -> list[di
                 "reason": f"{age}d since last human/agent verification",
             }
         )
-    return sorted(out, key=lambda item: (item["level"] != "fail", item["level"] != "warn", -(item["age_days"] or 0)))
+    return sorted(
+        out, key=lambda item: (item["level"] != "fail", item["level"] != "warn", -(item["age_days"] or 0))
+    )
 
 
 def staleness_gate(data: dict[str, Any], *, strict: bool = True) -> tuple[bool, list[str]]:
     findings = staleness(data)
-    problems = [
-        f"{item['id']}: {item['reason']}" for item in findings if item["level"] == "fail"
-    ]
+    problems = [f"{item['id']}: {item['reason']}" for item in findings if item["level"] == "fail"]
     warnings = [f"{item['id']}: {item['reason']}" for item in findings if item["level"] == "warn"]
     ok = not problems if strict else True
     return ok, problems + warnings
@@ -240,7 +240,16 @@ def _fmt_stars(value: Any) -> str:
 
 
 def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | None = None) -> str:
-    now = utcnow()
+    # Render from the source snapshot timestamp, not wall-clock time. This keeps
+    # the checked-in Markdown reproducible across CI runs and avoids a
+    # minute-by-minute generated diff when the source data has not changed.
+    try:
+        now = datetime.fromisoformat(str(data["generated_at"]))
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=timezone.utc)
+        now = now.astimezone(timezone.utc)
+    except (KeyError, TypeError, ValueError):
+        now = utcnow()
     tools = data.get("tools", [])
     policy = data.get("policy", {})
     lines: list[str] = []
@@ -248,18 +257,26 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
 
     add("# AI Tool Registry — Long-Video & Media Automation")
     add("")
-    add("> **Auto-generated. Do not hand-edit.** Source of truth: [`registry/tools.json`](registry/tools.json).")
+    add(
+        "> **Auto-generated. Do not hand-edit.** Source of truth: [`registry/tools.json`](registry/tools.json)."
+    )
     add("> Regenerate: `python -m scripts.video_pipeline.cli registry render`")
-    add(f"> Last refresh: **{now.strftime('%Y-%m-%d %H:%M UTC')}** · next due: **{data.get('next_refresh_due','—')}**")
+    add(
+        f"> Last refresh: **{now.strftime('%Y-%m-%d %H:%M UTC')}** · next due: **{data.get('next_refresh_due', '—')}**"
+    )
     add("")
 
     verified = sum(1 for t in tools if t.get("confidence") == "verified")
     current = sum(1 for t in tools if t.get("status") == "current")
     add("## Status")
     add("")
-    add(f"- **{len(tools)}** tools tracked · **{verified}** human/agent-verified · **{current}** currently usable")
-    add(f"- Policy: refresh every **{policy.get('refresh_interval_hours', 24)} h**; "
-        f"warn after **{policy.get('warn_after_days', 7)} d**; CI fails after **{policy.get('fail_after_days', 30)} d** without re-verification.")
+    add(
+        f"- **{len(tools)}** tools tracked · **{verified}** human/agent-verified · **{current}** currently usable"
+    )
+    add(
+        f"- Policy: refresh every **{policy.get('refresh_interval_hours', 24)} h**; "
+        f"warn after **{policy.get('warn_after_days', 7)} d**; CI fails after **{policy.get('fail_after_days', 30)} d** without re-verification."
+    )
     add(f"- Rule: *{policy.get('rule', '')}*")
     add("")
 
@@ -268,10 +285,14 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
     if corrections:
         add("## ⚠️ Corrections to widely-repeated advice")
         add("")
-        add("These claims are common in 2025-era tutorials and are **wrong today**. The registry records the correction so the pipeline never encodes folklore.")
+        add(
+            "These claims are common in 2025-era tutorials and are **wrong today**. The registry records the correction so the pipeline never encodes folklore."
+        )
         add("")
         for item in corrections:
-            add(f"<details><summary><strong>{item['claim']}</strong> → {item['reality'].split('.')[0]}.</summary>")
+            add(
+                f"<details><summary><strong>{item['claim']}</strong> → {item['reality'].split('.')[0]}.</summary>"
+            )
             add("")
             add(item["reality"])
             add("")
@@ -288,10 +309,14 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
         add("| Tool | Model ID | Shutdown | Days left | Action |")
         add("|---|---|---|---|---|")
         for tool in watch:
-            days = _days_until(str(tool["deprecation_date"]))
-            remaining = "**passed**" if days is not None and days < 0 else (f"{days}" if days is not None else "—")
+            days = _days_until(str(tool["deprecation_date"]), today=now)
+            remaining = (
+                "**passed**" if days is not None and days < 0 else (f"{days}" if days is not None else "—")
+            )
             action = "🚫 do not start new work" if days is not None and days <= 7 else "plan migration"
-            add(f"| {tool['name']} | `{tool.get('model_id','')}` | {tool['deprecation_date']} | {remaining} | {action} |")
+            add(
+                f"| {tool['name']} | `{tool.get('model_id', '')}` | {tool['deprecation_date']} | {remaining} | {action} |"
+            )
         add("")
 
     # -- category tables ---------------------------------------------------
@@ -299,28 +324,32 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
         rows = [t for t in tools if t.get("category") == category]
         if not rows:
             continue
-        rows.sort(key=lambda t: (t.get("role") != "primary", t.get("role") != "primary-tts", t.get("name", "")))
+        rows.sort(
+            key=lambda t: (t.get("role") != "primary", t.get("role") != "primary-tts", t.get("name", ""))
+        )
         add(f"## {label}")
         add("")
         add("| Tool | Model / ID | Licence | Cost | Hardware | Status | Role |")
         add("|---|---|---|---|---|---|---|")
         for tool in rows:
             add(
-                f"| [{tool['name']}]({tool.get('source','')}) "
-                f"| `{tool.get('model_id','')}` "
-                f"| {tool.get('license_id','')} "
-                f"| {tool.get('cost','')} "
-                f"| {tool.get('hardware','')} "
-                f"| {STATUS_ICON.get(tool.get('status',''), tool.get('status',''))} "
-                f"| {ROLE_LABEL.get(tool.get('role',''), tool.get('role',''))} |"
+                f"| [{tool['name']}]({tool.get('source', '')}) "
+                f"| `{tool.get('model_id', '')}` "
+                f"| {tool.get('license_id', '')} "
+                f"| {tool.get('cost', '')} "
+                f"| {tool.get('hardware', '')} "
+                f"| {STATUS_ICON.get(tool.get('status', ''), tool.get('status', ''))} "
+                f"| {ROLE_LABEL.get(tool.get('role', ''), tool.get('role', ''))} |"
             )
         add("")
         add("<details><summary>Notes, free-tier reality and verification dates</summary>")
         add("")
         for tool in rows:
-            add(f"**{tool['name']}** — free tier: {tool.get('free_tier','—')}. "
-                f"Commercial use: {tool.get('commercial_use','—')}. "
-                f"Verified {tool.get('verified_at','—')} ({tool.get('confidence','—')}).")
+            add(
+                f"**{tool['name']}** — free tier: {tool.get('free_tier', '—')}. "
+                f"Commercial use: {tool.get('commercial_use', '—')}. "
+                f"Verified {tool.get('verified_at', '—')} ({tool.get('confidence', '—')})."
+            )
             if tool.get("notes"):
                 add(f"> {tool['notes']}")
             add("")
@@ -334,10 +363,10 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
     add("|---|---|---|---|---|---|---|---|")
     for tool in sorted(tools, key=lambda t: (t.get("category", ""), t.get("name", ""))):
         add(
-            f"| {tool['name']} | <{tool.get('source','')}> | {tool.get('confidence','—')} "
-            f"| {tool.get('verified_at','—')} | {_fmt_stars(tool.get('stars'))} "
+            f"| {tool['name']} | <{tool.get('source', '')}> | {tool.get('confidence', '—')} "
+            f"| {tool.get('verified_at', '—')} | {_fmt_stars(tool.get('stars'))} "
             f"| {(tool.get('last_push') or '—')[:10]} | {tool.get('repo') or '—'} "
-            f"| {tool.get('license_check','not checked')} |"
+            f"| {tool.get('license_check', 'not checked')} |"
         )
     add("")
 
@@ -348,8 +377,8 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
         add("|---|---|---|---|---|---|")
         for record in history[-10:][::-1]:
             add(
-                f"| {record.get('at','')} | {record.get('source','')} | {record.get('tools','')} "
-                f"| {record.get('checked','')} | {record.get('updated','')} | {record.get('warnings','')} |"
+                f"| {record.get('at', '')} | {record.get('source', '')} | {record.get('tools', '')} "
+                f"| {record.get('checked', '')} | {record.get('updated', '')} | {record.get('warnings', '')} |"
             )
         add("")
 
@@ -358,11 +387,19 @@ def render_markdown(data: dict[str, Any], *, history: list[dict[str, Any]] | Non
     add("### How to update this file")
     add("")
     add("1. Read the primary source (vendor pricing/licence page, model card, repo).")
-    add("2. Edit the entry in `registry/tools.json`; set `verified_at` to today and `confidence` to `verified`.")
-    add("3. `python -m scripts.video_pipeline.cli registry refresh --github` (liveness + licence cross-check).")
-    add("4. `python -m scripts.video_pipeline.cli registry render` and commit with the source links in the message.")
+    add(
+        "2. Edit the entry in `registry/tools.json`; set `verified_at` to today and `confidence` to `verified`."
+    )
+    add(
+        "3. `python -m scripts.video_pipeline.cli registry refresh --github` (liveness + licence cross-check)."
+    )
+    add(
+        "4. `python -m scripts.video_pipeline.cli registry render` and commit with the source links in the message."
+    )
     add("")
-    add("CI runs the staleness gate daily; a stale primary tool fails the build rather than silently rotting.")
+    add(
+        "CI runs the staleness gate daily; a stale primary tool fails the build rather than silently rotting."
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -386,8 +423,14 @@ def read_history(limit: int = 30) -> list[dict[str, Any]]:
     return out
 
 
-def update(*, github: bool = True, token: str | None = None, render: bool = True,
-           record: bool = True, source: str = "manual") -> dict[str, Any]:
+def update(
+    *,
+    github: bool = True,
+    token: str | None = None,
+    render: bool = True,
+    record: bool = True,
+    source: str = "manual",
+) -> dict[str, Any]:
     data = load_registry()
     result: dict[str, Any] = {"tools": len(data.get("tools", []))}
     if github:
